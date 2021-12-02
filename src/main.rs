@@ -14,12 +14,12 @@ fn main() {
 
     match day.as_str() {
         "1" => {
-            part1_result = day1::part_one(input.clone());
-            part2_result = day1::part_two(input.clone());
+            part1_result = day1::part_one(&input[..]);
+            part2_result = day1::part_two(&input[..]);
         }
         "2" => {
-            part1_result = day2::part_one(input.clone());
-            part2_result = day2::part_two(input.clone());
+            part1_result = day2::part_one(&input[..]);
+            part2_result = day2::part_two(&input[..]);
         }
         _ => (),
     }

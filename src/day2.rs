@@ -1,15 +1,13 @@
-use itertools::Itertools;
-
-pub fn part_one(input: String) -> i32 {
+pub fn part_one(input: &str) -> i32 {
     let mut x = 0;
     let mut y = 0;
 
-    for chunk in input.split_whitespace().chunks(2).into_iter() {
-        let line = chunk.collect::<Vec<&str>>();
-        match (line[0], line[1].parse::<i32>().unwrap()) {
-            ("forward", value) => x += value,
-            ("down", value) => y += value,
-            ("up", value) => y -= value,
+    for line in input.split('\n').map(|x| x.split_once(' ').unwrap()) {
+        let value = line.1.parse::<i32>().unwrap();
+        match line.0 {
+            "forward" => x += value,
+            "down" => y += value,
+            "up" => y -= value,
             _ => (),
         }
     }
@@ -17,20 +15,20 @@ pub fn part_one(input: String) -> i32 {
     x * y
 }
 
-pub fn part_two(input: String) -> i32 {
+pub fn part_two(input: &str) -> i32 {
     let mut x = 0;
     let mut y = 0;
     let mut aim = 0;
 
-    for chunk in input.split_whitespace().chunks(2).into_iter() {
-        let line = chunk.collect::<Vec<&str>>();
-        match (line[0], line[1].parse::<i32>().unwrap()) {
-            ("forward", val) => {
+    for line in input.split('\n').map(|x| x.split_once(' ').unwrap()) {
+        let val = line.1.parse::<i32>().unwrap();
+        match line.0  {
+            "forward" => {
                 x += val;
                 y += aim * val;
             }
-            ("down", val) => aim += val,
-            ("up", val) => aim -= val,
+            "down" => aim += val,
+            "up" => aim -= val,
             _ => (),
         }
     }
@@ -41,11 +39,11 @@ pub fn part_two(input: String) -> i32 {
 #[test]
 fn example_input_part1() {
     let input = include_str!("../day2sample.input");
-    assert_eq!(part_one(input.to_string()), 150);
+    assert_eq!(part_one(input), 150);
 }
 
 #[test]
 fn example_input_part2() {
     let input = include_str!("../day2sample.input");
-    assert_eq!(part_two(input.to_string()), 900);
+    assert_eq!(part_two(input), 900);
 }
