@@ -2,6 +2,7 @@ use std::{env::args, fs::read_to_string};
 
 mod day1;
 mod day2;
+mod day3;
 
 fn main() {
     let day = args().skip(1).next().unwrap();
@@ -9,21 +10,19 @@ fn main() {
     let path = format!("day{}.input", day);
     let input = read_to_string(path).unwrap();
 
-    let mut part1_result = 0;
-    let mut part2_result = 0;
-
     match day.as_str() {
         "1" => {
-            part1_result = day1::part_one(&input[..]);
-            part2_result = day1::part_two(&input[..]);
+            println!("Part one: {}", day1::part_one(&input));
+            println!("Part two: {}", day1::part_two(&input));
         }
         "2" => {
-            part1_result = day2::part_one(&input[..]);
-            part2_result = day2::part_two(&input[..]);
+            println!("Part one: {}", day2::part_one(&input));
+            println!("Part two: {}", day2::part_two(&input));
+        }
+        "3" => {
+            println!("Part one: {}", day3::part_one(&input));
+            println!("Part two: {}", day3::part_two(&input));
         }
         _ => (),
     }
-
-    println!("Part one: {}", part1_result);
-    println!("Part two: {}", part2_result);
 }
