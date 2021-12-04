@@ -17,21 +17,22 @@ fn load_bingo_setup(input: &str) -> (Split<char>, Vec<Vec<&str>>) {
 }
 
 fn play_bingo(bingo_numbers: Split<char>, boards: &Vec<Vec<&str>>) -> Option<BingoResult> {
-    let mut marked_positions: Vec<HashSet<usize>> = vec![HashSet::new(); boards.len()];
+    let win_conditions = win_conditions();
+    let mut marked_positions_vec: Vec<HashSet<usize>> = vec![HashSet::new(); boards.len()];
 
     for bingo_number in bingo_numbers {
         for (board_num, board) in boards.iter().enumerate() {
             for (pos, num) in board.iter().enumerate() {
                 if *num == bingo_number {
-                    marked_positions[board_num].insert(pos);
+                    marked_positions_vec[board_num].insert(pos);
                 }
             }
         }
 
-        for i in 0..marked_positions.len() {
-            if check_win_condition(&marked_positions[i]) {
+        for i in 0..marked_positions_vec.len() {
+            if check_win_condition(&marked_positions_vec[i], &win_conditions) {
                 return Some(BingoResult {
-                    winning_score: sum_of_unmarked(&boards[i], &marked_positions[i])
+                    winning_score: sum_of_unmarked(&boards[i], &marked_positions_vec[i])
                         * bingo_number.parse::<u32>().unwrap(),
                     winning_board_index: i,
                 });
@@ -89,8 +90,11 @@ fn win_conditions() -> [HashSet<usize>; BOARD_SIZE * 2] {
     ]
 }
 
-fn check_win_condition(marked_numbers: &HashSet<usize>) -> bool {
-    for win_combo in win_conditions() {
+fn check_win_condition(
+    marked_numbers: &HashSet<usize>,
+    win_conditions: &[HashSet<usize>; BOARD_SIZE * 2],
+) -> bool {
+    for win_combo in win_conditions {
         if win_combo.is_subset(&marked_numbers) {
             return true;
         }
