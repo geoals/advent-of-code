@@ -9,7 +9,7 @@ mod day6;
 mod day7;
 
 fn main() {
-    let day = args().skip(1).next().unwrap();
+    let day = args().nth(1).unwrap();
 
     let path = format!("day{}.input", day);
     let input = read_to_string(path).unwrap();

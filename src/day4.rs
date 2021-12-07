@@ -16,7 +16,7 @@ fn load_bingo_setup(input: &str) -> (Split<char>, Vec<Vec<&str>>) {
     (bingo_numbers, boards)
 }
 
-fn play_bingo(bingo_numbers: Split<char>, boards: &Vec<Vec<&str>>) -> Option<BingoResult> {
+fn play_bingo(bingo_numbers: Split<char>, boards: &[Vec<&str>]) -> Option<BingoResult> {
     let win_conditions = win_conditions();
     let mut marked_positions_vec: Vec<HashSet<usize>> = vec![HashSet::new(); boards.len()];
 
@@ -61,7 +61,7 @@ pub fn part_two(input: &str) -> u32 {
     0
 }
 
-fn sum_of_unmarked(board: &Vec<&str>, marked_positions: &HashSet<usize>) -> u32 {
+fn sum_of_unmarked(board: &[&str], marked_positions: &HashSet<usize>) -> u32 {
     board
         .iter()
         .enumerate()
@@ -95,7 +95,7 @@ fn check_win_condition(
     win_conditions: &[HashSet<usize>; BOARD_SIZE * 2],
 ) -> bool {
     for win_combo in win_conditions {
-        if win_combo.is_subset(&marked_numbers) {
+        if win_combo.is_subset(marked_numbers) {
             return true;
         }
     }

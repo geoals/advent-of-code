@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 fn into_i64_vec(input: &str) -> Vec<i64> {
-    input.split(",").map(|n| n.parse().unwrap()).collect()
+    input.split(',').map(|n| n.parse().unwrap()).collect()
 }
 
 fn run_fish_simulation(input: &str, number_of_iterations: i64) -> usize {
