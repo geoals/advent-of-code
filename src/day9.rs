@@ -8,21 +8,19 @@ pub fn part_one(input: &str) -> u32 {
         .fold(0, |acc, cur| acc + heightmap[cur.1][cur.0] + 1)
 }
 
-fn find_low_points(heightmap: &[Vec<u32>]) -> Vec<(usize, usize)> {
+fn find_low_points(map: &[Vec<u32>]) -> Vec<(usize, usize)> {
     let mut low_points = vec![];
-    let width = heightmap[0].len();
-    let height = heightmap.len();
+    let width = map[0].len();
+    let height = map.len();
 
-    for y in 0..height {
-        for x in 0..width {
-            let left = x == 0 || heightmap[y][x - 1] > heightmap[y][x];
-            let right = x == width - 1 || heightmap[y][x + 1] > heightmap[y][x];
-            let up = y == 0 || heightmap[y - 1][x] > heightmap[y][x];
-            let down = y == height - 1 || heightmap[y + 1][x] > heightmap[y][x];
+    for (x, y) in (0..height).cartesian_product(0..width) {
+            let left = x == 0 || map[y][x - 1] > map[y][x];
+            let right = x == width - 1 || map[y][x + 1] > map[y][x];
+            let up = y == 0 || map[y - 1][x] > map[y][x];
+            let down = y == height - 1 || map[y + 1][x] > map[y][x];
 
             if left && right && up && down {
                 low_points.push((x, y));
-            }
         }
     }
 
