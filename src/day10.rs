@@ -1,66 +1,54 @@
+use std::collections::HashMap;
+use itertools::Itertools;
+
 pub fn part_one(input: &str) -> i64 {
-    let lines: Vec<&str> = input.lines().collect();
-    let mut corrupted_chars = vec![];
-    for line in lines {
-        if let Some(c) = is_corrupt(line) {
-            corrupted_chars.push(c);
-            continue;
-        }
-    }
-    sum(&corrupted_chars)
+    sum(input.lines().filter_map(is_corrupted).collect())
 }
 
-fn sum(chars: &[char]) -> i64 {
-    chars.iter().fold(0, |sum, c| {
-        sum + match c {
-            ')' => 3,
-            ']' => 57,
-            '}' => 1197,
-            '>' => 25137,
-            _ => 0,
-        }
-    })
+fn sum(chars: Vec<char>) -> i64 {
+    let scores = HashMap::from([(')', 3), (']', 57), ('}', 1197), ('>', 25137)]);
+    chars.iter().fold(0, |sum, c| sum + scores[c] )
 }
 
-fn is_corrupt(line: &str) -> Option<char> {
+fn is_corrupted(line: &str) -> Option<char> {
     let mut stack = vec![];
     for c in line.chars() {
-        match c {
-            '[' | '(' | '{' | '<' => stack.push(c),
-            ']' | ')' | '}' | '>' => {
-                let result = stack.pop();
-                if result.is_none() || match_to_closing_char(result.unwrap()) != c {
-                    return Some(c);
-                }
-            }
-            _ => return Some(c),
+        if ['[','(','{','<'].contains(&c) {
+            stack.push(c);
+            continue;
+        } 
+        if c != to_closing_char(stack.pop().unwrap()) {
+            return Some(c);
         }
     }
     None
 }
 
-fn match_to_closing_char(c: char) -> char {
-    match c {
-        '[' => ']',
-        '(' => ')',
-        '{' => '}',
-        '<' => '>',
-        _ => '🙈',
-    }
+fn to_closing_char(c: char) -> char {
+    match c { '[' => ']', '(' => ')', '{' => '}', '<' => '>', _ => '🙈' }
 }
 
 pub fn part_two(input: &str) -> i64 {
-    0
+    let scores: Vec<i64> = input
+        .lines()
+        .filter(|line| is_corrupted(line).is_none())
+        .map(|l| sum_part2(&autocomplete(l)))
+        .sorted()
+        .collect();
+    scores[scores.len() / 2]
 }
 
-#[test]
-fn example_part1() {
-    let input = include_str!("../day10sample.input");
-    assert_eq!(part_one(input), 26397);
+fn autocomplete(line: &str) -> Vec<char> {
+    let mut stack = vec![];
+    for c in line.chars() {
+        if ['[','(','{','<'].contains(&c) {
+            stack.push(c);
+        } else { stack.pop(); } 
+    }
+    stack.into_iter().rev().map(to_closing_char).collect::<Vec<char>>()
 }
 
-#[test]
-fn simpler_example_part1() {
-    let input = "[(]\n";
-    assert_eq!(part_one(input), 57);
+fn sum_part2(chars: &[char]) -> i64 {
+    let scores = HashMap::from([(')', 1), (']', 2), ('}', 3), ('>', 4)]);
+    chars.iter().fold(0, |sum, c| sum * 5 + scores[c])
 }
