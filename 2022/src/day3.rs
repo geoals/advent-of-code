@@ -3,26 +3,26 @@ use itertools::Itertools;
 
 pub fn part_one(input: &str) -> i32 {
     input.lines().map(|line| {
-        let first_set: HashSet<char> = (&line[0 .. line.len()/2]).chars().collect();
-        let second_set: HashSet<char> = (&line[line.len()/2 .. line.len()]).chars().collect();
-        let target = *first_set.intersection(&second_set).next().unwrap();
-        priority(target)
-    }).sum()
+        let left  = as_set(&line[..line.len() / 2]);
+        let right = as_set(&line[line.len() / 2..]);
+        *left.intersection(&right).next().unwrap()
+    }).map(priority).sum()
+}
+
+pub fn part_two(input: &str) -> i32 {
+    input.lines().tuples().map(|(a, b, c)| {
+        let intersection_set: HashSet<char> = as_set(a).intersection(&as_set(b)).copied().collect();
+        *intersection_set.intersection(&as_set(c)).next().unwrap()
+    })
+    .map(priority).sum()
 }
 
 fn priority(c: char) -> i32 {
     if c.is_ascii_lowercase() { c as i32 - 96 } else { c as i32 - 38 }
 }
 
-pub fn part_two(input: &str) -> i32 {
-    input.lines().chunks(3).into_iter().map(|mut group| {
-        let first_set: HashSet<char> = group.next().unwrap().chars().collect();
-        let second_set: HashSet<char> = group.next().unwrap().chars().collect();
-        let third_set: HashSet<char> = group.next().unwrap().chars().collect();
-        let intersection_set: HashSet<char> = first_set.intersection(&second_set).copied().collect();
-        let target = *intersection_set.intersection(&third_set).next().unwrap();
-        priority(target)
-    }).sum()
+fn as_set(val: &str) -> HashSet<char> { 
+    val.chars().collect() 
 }
 
 #[test]
