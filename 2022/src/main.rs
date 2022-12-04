@@ -3,6 +3,7 @@ use std::{env::args, fs::read_to_string};
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 
 fn main() {
     let day = args().nth(1).unwrap();
@@ -22,6 +23,10 @@ fn main() {
         "3" => {
             println!("Part one: {}", day3::part_one(&input));
             println!("Part two: {}", day3::part_two(&input));
+        }
+        "4" => {
+            println!("Part one: {}", day4::part_one(&input));
+            println!("Part two: {}", day4::part_two(&input));
         }
         _ => (),
     }
