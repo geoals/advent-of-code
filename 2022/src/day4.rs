@@ -27,7 +27,7 @@ fn overlaps(a: &str, b: &str) -> bool {
 #[test]
 fn example_input_part1() {
     let input = include_str!("../input/sample_4.txt");
-    assert_eq!(part_one(input), 3);
+    assert_eq!(part_one(input), 2);
 }
 
 #[test]
