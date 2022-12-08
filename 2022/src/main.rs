@@ -7,6 +7,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 fn main() {
     let day = args().nth(1).unwrap();
@@ -42,6 +43,10 @@ fn main() {
         "7" => {
             println!("Part one: {}", day7::part_one(&input));
             println!("Part two: {}", day7::part_two(&input));
+        }
+        "8" => {
+            println!("Part one: {}", day8::part_one(&input));
+            println!("Part two: {}", day8::part_two(&input));
         }
         _ => (),
     }

@@ -17,7 +17,7 @@ pub fn part_one(input: &str) -> usize {
                 "cd" => {
                     let next_dir_name = parts.next().unwrap();
                     if next_dir_name == "/" {
-                        dir_history.push(&mut root);
+                        // dir_history.push(&mut root);
                         // current_dir = &mut root;
                     } else if next_dir_name == ".." {
                         dir_history.pop();
@@ -39,7 +39,7 @@ pub fn part_one(input: &str) -> usize {
         } else if first_part == "dir" {
             // continue
             let last_dir = dir_history.last().unwrap();
-            last_dir.add_directory(parts.next().unwrap().to_string());
+            // last_dir.add_directory(parts.next().unwrap().to_string());
         // } else {
         //     dir_history.last().unwrap().add_file(
         //         first_part.parse::<usize>().unwrap(),
