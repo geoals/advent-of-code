@@ -6,8 +6,9 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
-mod day7;
+// mod day7;
 mod day8;
+mod day9;
 
 fn main() {
     let day = args().nth(1).unwrap();
@@ -17,7 +18,7 @@ fn main() {
 
     match day.as_str() {
         "1" => {
-            println!("Part one: {}", day2::part_one(&input));
+            println!("Part one: {}", day1::part_one(&input));
             println!("Part two: {}", day1::part_two(&input));
         }
         "2" => {
@@ -40,13 +41,17 @@ fn main() {
             println!("Part one: {}", day6::part_one(&input));
             println!("Part two: {}", day6::part_two(&input));
         }
-        "7" => {
-            println!("Part one: {}", day7::part_one(&input));
-            println!("Part two: {}", day7::part_two(&input));
-        }
+        // "7" => {
+        //     println!("Part one: {}", day7::part_one(&input));
+        //     println!("Part two: {}", day7::part_two(&input));
+        // }
         "8" => {
             println!("Part one: {}", day8::part_one(&input));
             println!("Part two: {}", day8::part_two(&input));
+        }
+        "9" => {
+            println!("Part one: {}", day9::part_one(&input));
+            println!("Part two: {}", day9::part_two(&input));
         }
         _ => (),
     }
