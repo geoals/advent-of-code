@@ -1,4 +1,4 @@
-use std::collections::{HashSet, HashMap};
+use std::collections::HashSet;
 
 pub fn part_one(input: &str) -> usize {
     run(input, 2)
@@ -10,7 +10,7 @@ pub fn part_two(input: &str) -> usize {
 
 fn run(input: &str, num_knots: usize) -> usize {
     let motions = input.lines().map(|line| {
-        let (direction, count ) = line.split_once(' ').unwrap();
+        let (direction, count) = line.split_once(' ').unwrap();
         (direction, count.parse::<i32>().unwrap())
     });
     let mut tail_visited = HashSet::<(i32, i32)>::from([(0, 0)]);
@@ -18,26 +18,19 @@ fn run(input: &str, num_knots: usize) -> usize {
 
     for (direction, count) in motions {
         for _ in 0..count {
-            for knot in 0..num_knots {
-                if knot == 0 {
-                    match direction {
-                        "R" => knot_positions[knot].0 += 1,
-                        "D" => knot_positions[knot].1 -= 1,
-                        "L" => knot_positions[knot].0 -= 1,
-                        "U" => knot_positions[knot].1 += 1,
-                        _ => panic!()
-                    }
-                    continue;
-                } 
-                let next_knot_pos = knot_positions[knot - 1];
-
-                if !is_adjacent(next_knot_pos, knot_positions[knot]) {
-                    let direction_vector = get_direction(knot_positions[knot], next_knot_pos);
+            match direction {
+                "R" => knot_positions[0].0 += 1,
+                "D" => knot_positions[0].1 -= 1,
+                "L" => knot_positions[0].0 -= 1,
+                "U" => knot_positions[0].1 += 1,
+                _ => panic!(),
+            }
+            for knot in 1..num_knots {
+                if !is_adjacent(knot_positions[knot - 1], knot_positions[knot]) {
+                    let direction_vector = get_direction(knot_positions[knot], knot_positions[knot - 1]);
                     knot_positions[knot].0 += direction_vector.0;
                     knot_positions[knot].1 += direction_vector.1;
-                    if knot == num_knots - 1 {
-                        tail_visited.insert(knot_positions[knot]);
-                    }
+                    tail_visited.insert(knot_positions[num_knots - 1]);
                 }
             }
         }
@@ -48,8 +41,8 @@ fn run(input: &str, num_knots: usize) -> usize {
 
 fn get_direction(a: (i32, i32), b: (i32, i32)) -> (i32, i32) {
     let vector = (b.0 - a.0, b.1 - a.1);
-    let x = if vector.0 == 0 { 0 } else if vector.0 > 0 { 1 } else  { -1 };
-    let y = if vector.1 == 0 { 0 } else if vector.1 > 0 { 1 } else  { -1 };
+    let x = if vector.0 == 0 { 0 } else if vector.0 > 0 { 1 } else { -1 };
+    let y = if vector.1 == 0 { 0 } else if vector.1 > 0 { 1 } else { -1 };
     (x, y)
 }
 
@@ -85,4 +78,3 @@ U 20
 ";
     assert_eq!(part_two(input), 36);
 }
-
