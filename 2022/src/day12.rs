@@ -1,49 +1,63 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque};
 use itertools::Itertools;
 
 pub fn part_one(input: &str) -> usize {
     let grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
-    let width = grid[0].len();
-    let height = grid.len();
-    // (0..width).cartesian_product(0..height).map(|(x, y)| {
-    //     println!("{}, {}: {}", x, y, grid[y][x]);
-    // }).count();
-
-    println!("{:?}", find_shortest_path(&grid, (0, 0), (5, 2)));
-    0
+    let start = find_pos(&grid, 'S');
+    let end = find_pos(&grid, 'E');
+    find_shortest_path(&grid, start, end)
 }
 
+pub fn part_two(input: &str) -> usize {
+    let grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
+    let end = find_pos(&grid, 'E');
+    let start_positions = find_starting_positions_part2(&grid);
+    start_positions.into_iter()
+        .map(|pos| find_shortest_path(&grid, pos, end))
+        .filter(|&x| x != 0)
+        .min().unwrap()
+}
+
+type StepCount = usize;
 type Pos = (usize, usize);
 
-fn find_shortest_path(grid: &[Vec<char>], start: Pos, end: Pos) -> Vec<Pos> {
-    let mut visited = HashSet::<Pos>::new();
-    let mut queue = VecDeque::<Pos>::new();
-    let mut steps = 0;
+fn find_pos(grid: &[Vec<char>], char: char) -> Pos {
+    let width = grid[0].len();
+    let height = grid.len();
+    (0..width).cartesian_product(0..height).find(|&(x, y)| {
+        grid[y][x] == char
+    }).unwrap()
+}
 
-    queue.push_back(start);
+fn find_starting_positions_part2(grid: &[Vec<char>]) -> Vec<Pos> {
+    let width = grid[0].len();
+    let height = grid.len();
+    (0..width).cartesian_product(0..height).filter(|&(x, y)| {
+        grid[y][x] == 'a' || grid[y][x] == 'S'
+    }).collect()
+}
+
+fn find_shortest_path(grid: &[Vec<char>], start: Pos, end: Pos) -> StepCount {
+    let mut visited = HashSet::<Pos>::new();
+    let mut queue = VecDeque::<(Pos, StepCount)>::new();
+
+    queue.push_back((start, 0));
     visited.insert(start);
 
     while !queue.is_empty() {
-        // println!("Queue: {:?}", queue);
-        let current_pos = queue.pop_front().unwrap();
-        steps += 1;
-        println!("Current pos: {:?}, {}", current_pos, grid[current_pos.1][current_pos.0]);
+        let (current_pos, current_steps) = queue.pop_front().unwrap();
         let neighbors = get_unvisited_neighbors(grid, current_pos, &visited);
-        // println!("Neighbors: {:?}", neighbors);
+
         for neighbor in neighbors {
-            queue.push_back(neighbor);
+            queue.push_back((neighbor, current_steps + 1));
             visited.insert(neighbor);
             if neighbor.0 == end.0 && neighbor.1 == end.1 {
-                println!("{}", steps);
-                return queue.into_iter().collect();
+                return current_steps + 1
             }
-            println!("{}", steps);
         }
-        // get neighbors
-        // for neighbor of neighbors: if not already visited: visit it
     }
 
-    queue.into_iter().collect()
+    0
 }
 
 fn get_unvisited_neighbors(grid: &[Vec<char>], position: Pos, visited: &HashSet::<Pos>) -> Vec<Pos> {
@@ -67,18 +81,12 @@ fn get_unvisited_neighbors(grid: &[Vec<char>], position: Pos, visited: &HashSet:
 }
 
 fn is_valid_direction(grid: &[Vec<char>], from: Pos, to: Pos) -> bool {
-    // println!("checking if {:?} to {:?} is valid", from, to);
     let from_char = grid[from.1][from.0];
     let from_char_i32 = if from_char == 'S' { 'a' } else { from_char } as i32;
     let to_char = grid[to.1][to.0];
     let to_char_i32 = if to_char == 'E' { 'z' } else { to_char } as i32;
-    let is_valid = from_char_i32 >= to_char_i32 - 1; // TODO remove the first part of this
-    // println!("from {} to {}: {}", from_char, to_char, is_valid);
-    is_valid
-}
 
-pub fn part_two(_input: &str) -> usize {
-    0
+    from_char_i32 >= to_char_i32 - 1
 }
 
 #[test]
@@ -107,7 +115,7 @@ acctuvwj
 abdefghi";
     let grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
     assert_eq!(true, is_valid_direction(&grid, (1, 0), (2, 0)));
-    assert_eq!(false, is_valid_direction(&grid, (1, 0), (0, 0)));
+    assert_eq!(false, is_valid_direction(&grid, (2, 0), (3, 0)));
     assert_eq!(true, is_valid_direction(&grid, (1, 0), (1, 1)));
 }
 
@@ -120,4 +128,15 @@ accszExk
 acctuvwj
 abdefghi";
     assert_eq!(31, part_one(input));
+}
+#[test]
+
+fn test_part_two() {
+    let input = "\
+Sabqponm
+abcryxxl
+accszExk
+acctuvwj
+abdefghi";
+    assert_eq!(29, part_two(input));
 }
