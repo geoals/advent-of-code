@@ -68,12 +68,21 @@ fn digit_as_str_to_i32(digit: &str) -> i32 {
 
 #[test]
 fn example_input_part1() {
-    let input = include_str!("../input/sample_1.txt");
+    let input = r#"1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet"#;
     assert_eq!(part_one(input), 142);
 }
 
 #[test]
 fn example_input_part2() {
-    let input = include_str!("../input/sample_1_2.txt");
+    let input = r#"two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen"#;
     assert_eq!(part_two(input), 281);
 }
