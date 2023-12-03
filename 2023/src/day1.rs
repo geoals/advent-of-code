@@ -11,7 +11,9 @@ pub fn part_one(input: &str) -> i32 {
             .find_iter(line)
             .map(|m| m.as_str().parse::<i32>().unwrap())
             .collect::<Vec<i32>>();
-        let the_number = format!("{}{}", matches[0], matches[matches.len() - 1]).parse::<i32>().unwrap();
+        let the_number = format!("{}{}", matches[0], matches[matches.len() - 1])
+            .parse::<i32>()
+            .unwrap();
         sum += the_number;
     }
 
@@ -31,7 +33,9 @@ pub fn part_two(input: &str) -> i32 {
         let line_reversed = line.chars().rev().collect::<String>();
         let matches_reversed = matches_as_i32(&reverse_regex, &line_reversed);
 
-        let the_number = format!("{}{}", matches[0], matches_reversed[0]).parse::<i32>().unwrap();
+        let the_number = format!("{}{}", matches[0], matches_reversed[0])
+            .parse::<i32>()
+            .unwrap();
         sum += the_number;
     }
 
@@ -41,11 +45,9 @@ pub fn part_two(input: &str) -> i32 {
 fn matches_as_i32(digit_regex: &Regex, line: &str) -> Vec<i32> {
     let matches = digit_regex
         .find_iter(line)
-        .map(|m| {
-            match m.as_str().parse::<i32>() {
-                Ok(digit) => digit,
-                Err(_) => digit_as_str_to_i32(m.as_str()),
-            }
+        .map(|m| match m.as_str().parse::<i32>() {
+            Ok(digit) => digit,
+            Err(_) => digit_as_str_to_i32(m.as_str()),
         })
         .collect::<Vec<i32>>();
     matches
