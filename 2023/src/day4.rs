@@ -35,25 +35,37 @@ fn amount_of_correct_numbers(line: &str) -> u32 {
 
 pub fn part_two(input: &str) -> i32 {
     let original_cards = input.lines().collect::<Vec<&str>>();
-    let mut cards: Vec<Vec<&str>> = vec![];
+    let mut cards: Vec<&str> = vec![];
+
+    let mut sum = 0;
 
     for (i, line) in input.lines().enumerate() {
-        cards.push(vec![line]);
+        sum += 1;
+        cards.push(line);
     }
 
-    for (i, card_list) in cards.clone().iter_mut().enumerate() {
-        for card in card_list {
-            let amount_of_correct_numbers = amount_of_correct_numbers(card) as usize;
-            let cards_to_insert =
-                &original_cards[i + 1..(i + amount_of_correct_numbers + 1) as usize];
-            for n in 0..cards_to_insert.len() {
-                cards[i + n + 1].push(cards_to_insert[n]);
-            }
+    // for card in cards.iter_mut() {
+    while let Some(card) = cards.pop() {
+        // dbg print sum if sum is divisible by 10000
+        // if sum % 10000 == 0 {
+        //     println!("sum: {}", sum);
+        // }
+
+        let amount_of_correct_numbers = amount_of_correct_numbers(card) as usize;
+        let i = get_card_numer(card) as usize - 1;
+        let cards_to_insert =
+            &original_cards[i + 1..(i + amount_of_correct_numbers + 1)];
+        for n in 0..cards_to_insert.len() {
+            sum += 1;
+            cards.push(cards_to_insert[n]);
         }
     }
-    dbg!(cards);
 
-    0
+    sum
+}
+
+fn get_card_numer(line: &str) -> i32 {
+    line.split_once(": ").unwrap().0.split_once(' ').unwrap().1.trim().parse().unwrap()
 }
 
 mod tests {
@@ -74,6 +86,6 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 
     #[test]
     fn example_input_part2() {
-        assert_eq!(part_two(SAMPLE_INPUT), 0);
+        assert_eq!(part_two(SAMPLE_INPUT), 30);
     }
 }
