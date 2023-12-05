@@ -1,9 +1,7 @@
-#![allow(dead_code, unused_imports, unused_variables, unused_mut)]
+#![allow(dead_code, unused_variables, unused_mut)]
 
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    vec,
-};
+use std::collections::HashSet;
+use std::ops::Range;
 
 pub fn part_one(input: &str) -> i32 {
     input.lines().map(score_card).sum()
@@ -19,9 +17,7 @@ fn score_card(line: &str) -> i32 {
 fn amount_of_correct_numbers(line: &str) -> u32 {
     let (left, right) = line.split_once(" | ").unwrap();
     let winning_numbers: HashSet<i32> = left
-        .split_once(": ")
-        .unwrap()
-        .1
+        .split_once(": ").unwrap().1
         .split_whitespace()
         .map(|n| n.parse().unwrap())
         .collect();
@@ -34,38 +30,22 @@ fn amount_of_correct_numbers(line: &str) -> u32 {
 }
 
 pub fn part_two(input: &str) -> i32 {
-    let original_cards = input.lines().collect::<Vec<&str>>();
-    let mut cards: Vec<&str> = vec![];
+    let cards = input.lines().collect::<Vec<&str>>();
+    let mut card_numbers: Vec<usize> = (0..cards.len()).collect();
+    let winning_numbers = get_winning_numbers_for_each_card(cards);
 
     let mut sum = 0;
-
-    for (i, line) in input.lines().enumerate() {
+    while let Some(card_number) = card_numbers.pop() {
+        card_numbers.extend(winning_numbers[card_number].clone());
         sum += 1;
-        cards.push(line);
     }
-
-    // for card in cards.iter_mut() {
-    while let Some(card) = cards.pop() {
-        // dbg print sum if sum is divisible by 10000
-        // if sum % 10000 == 0 {
-        //     println!("sum: {}", sum);
-        // }
-
-        let amount_of_correct_numbers = amount_of_correct_numbers(card) as usize;
-        let i = get_card_numer(card) as usize - 1;
-        let cards_to_insert =
-            &original_cards[i + 1..(i + amount_of_correct_numbers + 1)];
-        for n in 0..cards_to_insert.len() {
-            sum += 1;
-            cards.push(cards_to_insert[n]);
-        }
-    }
-
     sum
 }
 
-fn get_card_numer(line: &str) -> i32 {
-    line.split_once(": ").unwrap().0.split_once(' ').unwrap().1.trim().parse().unwrap()
+fn get_winning_numbers_for_each_card(cards: Vec<&str>) -> Vec<Range<usize>> {
+    cards.iter().enumerate().map(|(i, card)| {
+        i + 1..(i + 1 + amount_of_correct_numbers(card) as usize)
+    }).collect()
 }
 
 mod tests {
