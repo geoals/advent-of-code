@@ -12,6 +12,7 @@ mod day7;
 mod day8;
 mod day9;
 mod day10;
+mod day11;
 
 fn main() {
     let timer = Timer::new();
@@ -60,6 +61,10 @@ fn main() {
         "10" => {
             println!("Part one: {}", day10::part_one(&input));
             println!("Part two: {}", day10::part_two(&input));
+        },
+        "11" => {
+            println!("Part one: {}", day11::part_one(&input));
+            println!("Part two: {}", day11::part_two(&input));
         },
         _ => (),
     }
