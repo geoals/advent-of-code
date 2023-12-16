@@ -85,48 +85,20 @@ enum Side { Above, Below, Left, Right, None }
 
 // DFS from tile until x or y pos is at the edge of the grid
 // return false if there is a path to the edge
-// all tiles that are not part of the main_loop can be traversed, only the
-// loop counts as a wall
 fn is_inside_the_loop(tile: (usize, usize), pipe_grid: &[Vec<char>], main_loop: &HashMap<(usize, usize), char>) -> bool {
+    if main_loop.contains_key(&tile) {
+        return false;
+    }
+
     let mut visited: HashSet<(usize, usize)> = HashSet::new();
     let mut stack: Vec<(usize, usize)> = vec![tile];
     let mut side_stack: Vec<Side> = vec![Side::None];
-    let mut previous_pos = tile;
-
-    // pretty print pipe_grid with main_loop colorized green
-    // for (y, row) in pipe_grid.iter().enumerate() {
-    //     for (x, tile) in row.iter().enumerate() {
-    //         if main_loop.contains_key(&(x, y)) {
-    //             print!("\x1b[32m{}\x1b[0m", tile);
-    //         } else {
-    //             print!("{}", tile);
-    //         }
-    //     }
-    //     println!();
-    // }
 
     while let Some(current_pos) = stack.pop() {
         let side = side_stack.pop().unwrap();
-        // println!("{:?}:{:?}, side: {:?}", current, pipe_grid[current.1][current.0], side);
-        // is along edge of grid
-        if current_pos.0 == 0 || current_pos.0 == pipe_grid[0].len() - 1 || current_pos.1 == 0 || current_pos.1 == pipe_grid.len() - 1 { // and not on main loop?
-            // pretty print pipe_loop, colorize red if visited
-            // for (y, row) in pipe_grid.iter().enumerate() {
-            //     for (x, tile) in row.iter().enumerate() {
-            //         if visited.contains(&(x, y)) {
-            //             print!("\x1b[31m{}\x1b[0m", tile);
-            //         } else {
-            //             print!("{}", tile);
-            //         }
-            //     }
-            //     println!();
-            // }
+        if current_pos.0 == 0 || current_pos.0 == pipe_grid[0].len() - 1 || current_pos.1 == 0 || current_pos.1 == pipe_grid.len() - 1 {
             return false;
         }
-
-        let current_tile = pipe_grid[previous_pos.1][previous_pos.0];
-        let next_tile = pipe_grid[current_pos.1][current_pos.0];
-        // println!("side: {:?}, previous_tile: {:?}, current_tile: {:?}", &side, &current_tile, &next_tile);
 
         visited.insert(current_pos);
 
@@ -147,107 +119,27 @@ fn is_inside_the_loop(tile: (usize, usize), pipe_grid: &[Vec<char>], main_loop: 
             } else {
                 let next_tile = pipe_grid[next_pos.1][next_pos.0];
 
-                // traversal on main loop
-                match pipe_grid[current_pos.1][current_pos.0] {
-                    '|' => {
-                        if main_loop.contains_key(&next_pos) {
-                            if *direction == Direction::Up && (next_tile == '|' || next_tile == 'F' || next_tile == '7') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                            if *direction == Direction::Down && (next_tile == '|' || next_tile == 'J' || next_tile == 'L') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                        }
-                    }
-                    '-' => {
-                        if main_loop.contains_key(&next_pos) {
-                            if *direction == Direction::Left && (next_tile == '-' || next_tile == 'F' || next_tile == 'L') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                            if *direction == Direction::Right && (next_tile == '-' || next_tile == 'J' || next_tile == '7') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                        }
-                    }
-                    'J' => {
-                        if main_loop.contains_key(&next_pos) {
-                            if *direction == Direction::Up && (next_tile == '|' || next_tile == '7' || next_tile == 'F') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                            if *direction == Direction::Left && (next_tile == '-' || next_tile == 'L' || next_tile == 'F') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                        }
-                    }
-                    'L' => {
-                        if main_loop.contains_key(&next_pos) {
-                            if *direction == Direction::Up && (next_tile == '|' || next_tile == '7' || next_tile == 'F') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                            if *direction == Direction::Right && (next_tile == '-' || next_tile == 'J' || next_tile == '7') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                        }
-                    }
-                    'F' => {
-                        if main_loop.contains_key(&next_pos) {
-                            if *direction == Direction::Down && (next_tile == '|' || next_tile == 'J' || next_tile == 'L') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                            if *direction == Direction::Right && (next_tile == '-' || next_tile == 'J' || next_tile == '7') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                        }
-                    }
-                    '7' => {
-                        if main_loop.contains_key(&next_pos) {
-                            if *direction == Direction::Down && (next_tile == '|' || next_tile == 'J' || next_tile == 'L') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                            if *direction == Direction::Left && (next_tile == '-' || next_tile == 'L' || next_tile == 'F') {
-                                let current_tile = pipe_grid[current_pos.1][current_pos.0];
-                                let next_tile = pipe_grid[next_pos.1][next_pos.0];
-                                side_stack.push(get_next_side(side, current_tile, next_tile));
-                                stack.push(next_pos);
-                            }
-                        }
-                    }
-                    _ => {}
-                }
+                let is_valid_traversal_on_main_loop = main_loop.contains_key(&next_pos)
+                    && match pipe_grid[current_pos.1][current_pos.0] {
+                    '|' => (*direction == Direction::Up && (next_tile == '|' || next_tile == 'F' || next_tile == '7'))
+                        || (*direction == Direction::Down && (next_tile == '|' || next_tile == 'J' || next_tile == 'L')),
+                    '-' => (*direction == Direction::Left && (next_tile == '-' || next_tile == 'F' || next_tile == 'L'))
+                        || (*direction == Direction::Right && (next_tile == '-' || next_tile == 'J' || next_tile == '7')),
+                    'J' => (*direction == Direction::Up && (next_tile == '|' || next_tile == '7' || next_tile == 'F'))
+                        || (*direction == Direction::Left && (next_tile == '-' || next_tile == 'L' || next_tile == 'F')),
+                    'L' => (*direction == Direction::Up && (next_tile == '|' || next_tile == '7' || next_tile == 'F'))
+                        || (*direction == Direction::Right && (next_tile == '-' || next_tile == 'J' || next_tile == '7')),
+                    'F' => (*direction == Direction::Down && (next_tile == '|' || next_tile == 'J' || next_tile == 'L'))
+                        || (*direction == Direction::Right && (next_tile == '-' || next_tile == 'J' || next_tile == '7')),
+                    '7' => (*direction == Direction::Down && (next_tile == '|' || next_tile == 'J' || next_tile == 'L'))
+                        || (*direction == Direction::Left && (next_tile == '-' || next_tile == 'L' || next_tile == 'F')),
+                    _ => false,
+                };
 
+                if is_valid_traversal_on_main_loop {
+                    side_stack.push(get_next_side(side, pipe_grid[current_pos.1][current_pos.0], next_tile));
+                    stack.push(next_pos);
+                }
 
                 // traversal into main loop
                 if main_loop.contains_key(&next_pos) && !main_loop.contains_key(&current_pos) {
@@ -260,76 +152,40 @@ fn is_inside_the_loop(tile: (usize, usize), pipe_grid: &[Vec<char>], main_loop: 
                         stack.push(next_pos);
                     }
                     if *direction == Direction::Left && (next_tile == '7' || next_tile == 'J') {
-                        if (next_tile == '7') {
+                        if next_tile == '7' {
                             side_stack.push(Side::Above);
                         }
-                        if (next_tile == 'J') {
+                        if next_tile == 'J' {
                             side_stack.push(Side::Below);
                         }
                         stack.push(next_pos);
                     }
                     if *direction == Direction::Right && (next_tile == 'L' || next_tile == 'F') {
-                        if (next_tile == 'L') {
+                        if next_tile == 'L' {
                             side_stack.push(Side::Below);
                         }
-                        if (next_tile == 'F') {
+                        if next_tile == 'F' {
                             side_stack.push(Side::Above);
                         }
                         stack.push(next_pos);
                     }
                 }
 
-                //traversal out of main loop
-                if !main_loop.contains_key(&next_pos) && main_loop.contains_key(&current_pos) {
-                    match pipe_grid[current_pos.1][current_pos.0] {
-                        'J' => {
-                            if (*direction == Direction::Right || *direction == Direction::Down)
-                                && side == Side::Below {
-                                side_stack.push(Side::None);
-                                stack.push(next_pos);
-                            }
-                        }
-                        'L' => {
-                            if (*direction == Direction::Left || *direction == Direction::Down)
-                                && side == Side::Below {
-                                side_stack.push(Side::None);
-                                stack.push(next_pos);
-                            }
-                        }
-                        'F' => {
-                            if (*direction == Direction::Left || *direction == Direction::Up)
-                                && side == Side::Above {
-                                side_stack.push(Side::None);
-                                stack.push(next_pos);
-                            }
-                        }
-                        '7' => {
-                            if (*direction == Direction::Right || *direction == Direction::Up)
-                                && side == Side::Above {
-                                side_stack.push(Side::None);
-                                stack.push(next_pos);
-                            }
-                        }
-                        _ => {}
-                    };
+                let is_valid_traversal_out_of_main_loop = !main_loop.contains_key(&next_pos) && main_loop.contains_key(&current_pos)
+                    && match pipe_grid[current_pos.1][current_pos.0] {
+                    'J' => (*direction == Direction::Right || *direction == Direction::Down) && side == Side::Below,
+                    'L' => (*direction == Direction::Left || *direction == Direction::Down) && side == Side::Below,
+                    'F' => (*direction == Direction::Left || *direction == Direction::Up) && side == Side::Above,
+                    '7' => (*direction == Direction::Right || *direction == Direction::Up) && side == Side::Above,
+                    _ => false,
+                };
+                if is_valid_traversal_out_of_main_loop {
+                    stack.push(next_pos);
+                    side_stack.push(Side::None);
                 }
             }
         }
-
-        previous_pos = current_pos;
     }
-
-    // pretty print pipe_loop, colorize red if visited
-    // for (y, row) in pipe_grid.iter().enumerate() {
-    //     for (x, tile) in row.iter().enumerate() {
-    //         if visited.contains(&(x, y)) {
-    //             print!("\x1b[31m{}\x1b[0m", tile);
-    //         } else {
-    //             print!("{}", tile);
-    //         }
-    //     }
-    //     println!();
-    // }
 
     true
 }
@@ -337,45 +193,22 @@ fn is_inside_the_loop(tile: (usize, usize), pipe_grid: &[Vec<char>], main_loop: 
 fn get_next_side(side: Side, current_tile: char, next_tile: char) -> Side {
     match (&side, current_tile, next_tile) {
         (Side::Above, 'F', '-') => Side::Above,
-        (Side::Below, 'F', '-') => Side::Below,
         (Side::Above, 'F', '|') => Side::Left,
         (Side::Below, 'F', '|') => Side::Right,
-        (Side::Below, 'F', 'J') => Side::Below,
         (Side::Below, 'F', 'L') => Side::Above,
-        (Side::Below, 'F', '7') => Side::Below,
-        (Side::Above, 'F', 'J') => Side::Above,
         (Side::Above, 'F', 'L') => Side::Below,
-        (Side::Above, 'F', '7') => Side::Above,
-        (Side::Above, '7', '-') => Side::Above,
-        (Side::Below, '7', '-') => Side::Below,
         (Side::Above, '7', '|') => Side::Right,
         (Side::Below, '7', '|') => Side::Left,
         (Side::Below, '7', 'J') => Side::Above,
-        (Side::Below, '7', 'F') => Side::Below,
-        (Side::Below, '7', 'L') => Side::Below,
         (Side::Above, '7', 'J') => Side::Below,
-        (Side::Above, '7', 'F') => Side::Above,
-        (Side::Above, '7', 'L') => Side::Above,
-        (Side::Above, 'J', '-') => Side::Above,
-        (Side::Below, 'J', '-') => Side::Below,
         (Side::Above, 'J', '|') => Side::Left,
         (Side::Below, 'J', '|') => Side::Right,
-        (Side::Below, 'J', 'F') => Side::Below,
-        (Side::Below, 'J', 'L') => Side::Below,
         (Side::Below, 'J', '7') => Side::Above,
-        (Side::Above, 'J', 'F') => Side::Above,
-        (Side::Above, 'J', 'L') => Side::Above,
         (Side::Above, 'J', '7') => Side::Below,
-        (Side::Above, 'L', '-') => Side::Above,
-        (Side::Below, 'L', '-') => Side::Below,
         (Side::Above, 'L', '|') => Side::Right,
         (Side::Below, 'L', '|') => Side::Left,
-        (Side::Below, 'L', 'J') => Side::Below,
         (Side::Below, 'L', 'F') => Side::Above,
-        (Side::Below, 'L', '7') => Side::Below,
-        (Side::Above, 'L', 'J') => Side::Above,
         (Side::Above, 'L', 'F') => Side::Below,
-        (Side::Above, 'L', '7') => Side::Above,
         (Side::Left, '|', '7') => Side::Below,
         (Side::Left, '|', 'J') => Side::Above,
         (Side::Left, '|', 'L') => Side::Below,
@@ -399,8 +232,8 @@ pub fn part_two(input: &str) -> i32 {
 
     let mut inside_the_loop: HashSet<(usize, usize)> = HashSet::new();
     for (y, row) in pipe_grid.iter().enumerate() {
-        for (x, tile) in row.iter().enumerate() {
-            if !main_loop.contains_key(&(x, y)) && is_inside_the_loop((x, y), &pipe_grid, &main_loop) {
+        for (x, _) in row.iter().enumerate() {
+            if is_inside_the_loop((x, y), &pipe_grid, &main_loop) {
                 inside_the_loop.insert((x, y));
             }
         }
@@ -481,10 +314,6 @@ LJ...";
 ......................";
 
         assert_eq!(part_two(input), 10);
-
-        // let pipe_grid = input.split('\n').map(|line| line.chars().collect()).collect::<Vec<Vec<char>>>();
-        // let main_loop = find_main_loop(&pipe_grid);
-        // assert_eq!(true, is_inside_the_loop((15, 4), &pipe_grid, &main_loop));
     }
 
     #[test]
