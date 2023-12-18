@@ -67,6 +67,40 @@ fn generate_combinations(input: &str, replacements: usize) -> Vec<Vec<char>> {
     combinations
 }
 
+fn unfold(line: &str) -> String {
+    let (springs, numbers) = line.split_once(' ').unwrap();
+
+    let mut new_line = springs.to_string();
+    for _ in 0..4 {
+        new_line = format!("{}?{}", new_line, springs);
+    }
+
+    new_line = format!("{} {}", new_line, numbers);
+    for _ in 0..4 {
+        new_line = format!("{},{}", new_line, numbers);
+    }
+
+    new_line
+}
+
+pub fn part_two(input: &str) -> i64 {
+    let unfolded_lines = input.lines().map(unfold).collect::<Vec<String>>();
+
+    let mut sum = 0;
+    let mut valid_combinations = 0;
+    for (n, line) in unfolded_lines.iter().enumerate() {
+        let (springs, remaning_hashes) = get_it(line);
+        let combinations1 = generate_combinations(springs, remaning_hashes);
+        sum += combinations1.len();
+        let valid = combinations1.iter().filter(|&combination| valid_line(line, combination)).count();
+        println!("line {}, valid combinations: {}", n, valid);
+        valid_combinations += valid;
+    }
+
+    println!("total number of combinations {}", sum);
+    valid_combinations as i64
+}
+
 mod tests {
     use super::*;
 
@@ -109,4 +143,37 @@ mod tests {
         assert_eq!(valid_line(line2, &combination2), true);
     }
 
+    #[test]
+    fn test_unfold() {
+        let input = "???.### 1,1,3";
+        assert_eq!(
+            "???.###????.###????.###????.###????.### 1,1,3,1,1,3,1,1,3,1,1,3,1,1,3",
+            unfold(input)
+        );
+    }
+
+    #[test]
+    fn test_part_two() {
+
+        let input = "\
+???.### 1,1,3
+.??..??...?##. 1,1,3
+?#?#?#?#?#?#?#? 1,3,1,6
+????.#...#... 4,1,1
+????.######..#####. 1,6,5
+?###???????? 3,2,1";
+       assert_eq!(525152, part_two(input));
+    }
+
+    #[test]
+    fn test_part_two_1() {
+        let input = ".??..??...?##. 1,1,3";
+        assert_eq!(part_two(input), 16384);
+    }
+
+    #[test]
+    fn test_part_two_2() {
+        let input = "???.### 1,1,3";
+        assert_eq!(part_two(input), 1);
+    }
 }
