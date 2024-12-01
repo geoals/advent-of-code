@@ -1,14 +1,7 @@
 use std::collections::HashMap;
 
 pub fn part_one(input: &str) -> i64 {
-    let (mut list_one, mut list_two) = input
-        .lines()
-        .map(|line| {
-            let mut iter = line.split_whitespace().map(|n| n.parse::<i64>().unwrap());
-            (iter.next().unwrap(), iter.next().unwrap())
-        })
-        .collect::<(Vec<i64>, Vec<i64>)>();
-
+    let (mut list_one, mut list_two) = parse_lines_to_i64_lists(input);
     list_one.sort();
     list_two.sort();
 
@@ -16,27 +9,31 @@ pub fn part_one(input: &str) -> i64 {
         .iter()
         .zip(list_two.iter())
         .map(|(a, b)| (a - b).abs())
-        .sum::<i64>()
+        .sum()
 }
 
 pub fn part_two(input: &str) -> i64 {
-    let (list_one, list_two) = input
-        .lines()
-        .map(|line| {
-            let mut iter = line.split_whitespace().map(|n| n.parse::<i64>().unwrap());
-            (iter.next().unwrap(), iter.next().unwrap())
-        })
-        .collect::<(Vec<i64>, Vec<i64>)>();
+    let (list_one, list_two) = parse_lines_to_i64_lists(input);
 
-    let list_two_counts = list_two.iter().fold(HashMap::new(), |mut acc, &n| {
+    let counts = list_two.iter().fold(HashMap::new(), |mut acc, &n| {
         *acc.entry(n).or_insert(0) += 1;
         acc
     });
 
     list_one
         .iter()
-        .map(|n| list_two_counts.get(n).unwrap_or(&0) * n)
-        .sum::<i64>()
+        .map(|n| n * counts.get(n).unwrap_or(&0))
+        .sum()
+}
+
+fn parse_lines_to_i64_lists(input: &str) -> (Vec<i64>, Vec<i64>) {
+    input
+        .lines()
+        .map(|line| {
+            let mut numbers = line.split_whitespace().map(|n| n.parse::<i64>().unwrap());
+            (numbers.next().unwrap(), numbers.next().unwrap())
+        })
+        .unzip()
 }
 
 #[test]
