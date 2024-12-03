@@ -4,6 +4,7 @@ use took::Timer;
 
 mod day1;
 mod day2;
+mod day3;
 
 fn main() {
     let timer = Timer::new();
@@ -22,6 +23,10 @@ fn main() {
         "2" => {
             println!("Part one: {}", day2::part_one(&input));
             println!("Part two: {}", day2::part_two(&input));
+        }
+        "3" => {
+            println!("Part one: {}", day3::part_one(&input));
+            println!("Part two: {}", day3::part_two(&input));
         }
         _ => (),
     }
