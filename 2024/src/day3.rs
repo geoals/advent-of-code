@@ -1,39 +1,24 @@
-use lazy_static::lazy_static;
 use regex::Regex;
 
-lazy_static! {
-    static ref MUL_REGEX: Regex = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
-}
-
 pub fn part_one(input: &str) -> i64 {
-    MUL_REGEX
+    Regex::new(r"mul\((\d+),(\d+)\)")
+        .unwrap()
         .captures_iter(input)
         .map(|cap| cap[1].parse::<i64>().unwrap() * cap[2].parse::<i64>().unwrap())
         .sum()
 }
 
 pub fn part_two(input: &str) -> i64 {
-    let re = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
-    let on_off = Regex::new(r"do\(\)|don't\(\)").unwrap();
-    let mut enabled = true;
-    let mut sum = 0;
-    for sequence in input.split_inclusive(&re) {
-        let on_offs = on_off.find_iter(sequence);
-        for mathc in on_offs {
-            match mathc.as_str() {
-                "do()" => enabled = true,
-                "don't()" => enabled = false,
-                _ => {}
-            }
-        }
-        if !enabled {
-            continue;
-        }
+    let re = Regex::new(r"^mul\((\d+),(\d+)\)").unwrap();
 
-        sum += part_one(sequence);
-    }
-
-    sum
+    input
+        .match_indices("mul")
+        .filter(|&(pos, _)| {
+            input[..pos].rfind("do()").unwrap_or(0) >= input[..pos].rfind("don't()").unwrap_or(0)
+        })
+        .filter_map(|(pos, _)| re.captures(&input[pos..]))
+        .map(|expr| expr[1].parse::<i64>().unwrap() * expr[2].parse::<i64>().unwrap())
+        .sum()
 }
 
 #[test]
