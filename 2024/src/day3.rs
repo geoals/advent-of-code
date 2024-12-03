@@ -13,9 +13,7 @@ pub fn part_two(input: &str) -> i64 {
 
     input
         .match_indices("mul")
-        .filter(|&(pos, _)| {
-            input[..pos].rfind("do()").unwrap_or(0) >= input[..pos].rfind("don't()").unwrap_or(0)
-        })
+        .filter(|&(pos, _)| input[..pos].rfind("do()") >= input[..pos].rfind("don't()"))
         .filter_map(|(pos, _)| re.captures(&input[pos..]))
         .map(|expr| expr[1].parse::<i64>().unwrap() * expr[2].parse::<i64>().unwrap())
         .sum()
