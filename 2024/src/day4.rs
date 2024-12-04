@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 pub fn part_one(input: &str) -> usize {
     let grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
     let reversed_grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().rev().collect()).collect();
@@ -71,7 +69,7 @@ pub fn part_two(input: &str) -> i64 {
     for row in 0..grid.len() {
         for col in 0..grid[0].len() {
             if grid[row][col] == 'A' {
-                sum += find_x(&grid, row, col);
+                sum += i64::from(is_xmas(&grid, row, col));
             }
         }
     }
@@ -79,10 +77,9 @@ pub fn part_two(input: &str) -> i64 {
     sum
 }
 
-// returns 1 if found or 0 otherwise
-fn find_x(grid: &[Vec<char>], row: usize, col: usize) -> i64 {
+fn is_xmas(grid: &[Vec<char>], row: usize, col: usize) -> bool {
     if row >= grid.len() - 1 || col >= grid[0].len() - 1 || row == 0 || col == 0 {
-        return 0;
+        return false;
     }
 
     let x = vec![
@@ -92,18 +89,13 @@ fn find_x(grid: &[Vec<char>], row: usize, col: usize) -> i64 {
         grid[row + 1][col + 1],
     ];
 
-    if [
+    [
         vec!['M', 'M', 'S', 'S'],
         vec!['S', 'M', 'S', 'M'],
         vec!['M', 'S', 'M', 'S'],
         vec!['S', 'S', 'M', 'M'],
     ]
-    .iter()
     .contains(&x)
-    {
-        return 1;
-    }
-    0
 }
 
 #[test]
@@ -139,19 +131,3 @@ MXMXAXMASX
 
     assert_eq!(part_two(input), 9);
 }
-
-// m.m
-// .a.
-// s.s
-//
-// s.m
-// .a.
-// s.m
-//
-// m.s
-// .a.
-// m.s
-//
-// s.s
-// .a.
-// m.m
