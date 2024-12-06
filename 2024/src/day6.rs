@@ -30,6 +30,7 @@ pub fn traverse_map(
     mut direction: char,
 ) -> Option<HashSet<(usize, usize)>> {
     let mut visited: Vec<Vec<Option<char>>> = vec![vec![None; map[0].len()]; map.len()];
+    visited[position.1][position.0] = Some(direction);
 
     while inside_bounds(map, &position, &direction) {
         if is_blocked(map, &position, &direction) {
