@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 pub fn part_one(input: &str) -> usize {
     let map = build_map(input);
     let (position, direction) = start_pos_and_direction(&map);
@@ -13,7 +11,7 @@ pub fn part_two(input: &str) -> usize {
     let visited = traverse_map(&map, position, direction).unwrap();
 
     let mut cycle_count = 0;
-    for (x, y) in visited {
+    for ((x, y), _) in visited {
         let mut new_map = map.clone();
         new_map[y][x] = '#';
         if traverse_map(&new_map, position, direction).is_none() {
@@ -23,12 +21,12 @@ pub fn part_two(input: &str) -> usize {
     cycle_count
 }
 
-/// Returns none if a cycle is detected
+/// Returns None if a cycle is detected
 pub fn traverse_map(
     map: &[Vec<char>],
     mut position: (usize, usize),
     mut direction: char,
-) -> Option<HashSet<(usize, usize)>> {
+) -> Option<Vec<((usize, usize), char)>> {
     let mut visited: Vec<Vec<Option<char>>> = vec![vec![None; map[0].len()]; map.len()];
     visited[position.1][position.0] = Some(direction);
 
@@ -47,14 +45,17 @@ pub fn traverse_map(
         visited[position.1][position.0] = Some(direction);
     }
 
-    // Transform 2d array of visited positions to HashSet
-    Some(HashSet::from_iter(visited.iter().enumerate().flat_map(
-        |(y, row)| {
-            row.iter()
-                .enumerate()
-                .filter_map(move |(x, tile)| tile.map(|_| (x, y)))
-        },
-    )))
+    // Transform full 2D grid to list of visited positions and direction tuple
+    let mut positions = Vec::new();
+    for (y, row) in visited.iter().enumerate() {
+        for (x, &cell) in row.iter().enumerate() {
+            if let Some(c) = cell {
+                positions.push(((x, y), c));
+            }
+        }
+    }
+
+    Some(positions)
 }
 
 fn build_map(input: &str) -> Vec<Vec<char>> {
