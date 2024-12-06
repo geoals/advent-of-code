@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 pub fn part_one(input: &str) -> usize {
     let map = build_map(input);
     let (position, direction) = start_pos_and_direction(&map);
@@ -10,15 +12,18 @@ pub fn part_two(input: &str) -> usize {
     let (position, direction) = start_pos_and_direction(&map);
     let visited = traverse_map(&map, position, direction).unwrap();
 
-    let mut cycle_count = 0;
-    for ((x, y), _) in visited {
-        let mut new_map = map.clone();
-        new_map[y][x] = '#';
-        if traverse_map(&new_map, position, direction).is_none() {
-            cycle_count += 1;
-        }
-    }
-    cycle_count
+    visited
+        .par_iter()
+        .map(|&((x, y), _)| {
+            let mut new_map = map.clone();
+            new_map[y][x] = '#';
+            if traverse_map(&new_map, position, direction).is_none() {
+                1
+            } else {
+                0
+            }
+        })
+        .sum()
 }
 
 /// Returns None if a cycle is detected
