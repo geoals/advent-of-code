@@ -4,18 +4,16 @@ pub fn part_one(input: &str) -> usize {
     let map = build_map(input);
     let (position, direction) = start_pos_and_direction(&map);
     let visited = traverse_map(&map, position, direction).unwrap();
-    let visited_without_direction = visited.iter().map(|(pos, _)| *pos).collect::<HashSet<_>>();
-    visited_without_direction.len()
+    visited.len()
 }
 
 pub fn part_two(input: &str) -> usize {
     let map = build_map(input);
     let (position, direction) = start_pos_and_direction(&map);
     let visited = traverse_map(&map, position, direction).unwrap();
-    let visited_without_direction = visited.iter().map(|(pos, _)| *pos).collect::<HashSet<_>>();
 
     let mut cycle_count = 0;
-    for (x, y) in visited_without_direction {
+    for (x, y) in visited {
         let mut new_map = map.clone();
         new_map[y][x] = '#';
         if traverse_map(&new_map, position, direction).is_none() {
@@ -30,8 +28,8 @@ pub fn traverse_map(
     map: &[Vec<char>],
     mut position: (usize, usize),
     mut direction: char,
-) -> Option<HashSet<((usize, usize), char)>> {
-    let mut visited = HashSet::new();
+) -> Option<HashSet<(usize, usize)>> {
+    let mut visited: Vec<Vec<Option<char>>> = vec![vec![None; map[0].len()]; map.len()];
 
     while inside_bounds(map, &position, &direction) {
         if is_blocked(map, &position, &direction) {
@@ -39,14 +37,23 @@ pub fn traverse_map(
         }
         move_forward(&mut position, &direction);
 
-        if visited.contains(&(position, direction)) {
-            return None;
+        if let Some(visited_direction) = visited[position.1][position.0] {
+            if direction == visited_direction {
+                return None;
+            }
         }
 
-        visited.insert((position, direction));
+        visited[position.1][position.0] = Some(direction);
     }
 
-    Some(visited)
+    // Transform 2d array of visited positions to HashSet
+    Some(HashSet::from_iter(visited.iter().enumerate().flat_map(
+        |(y, row)| {
+            row.iter()
+                .enumerate()
+                .filter_map(move |(x, tile)| tile.map(|_| (x, y)))
+        },
+    )))
 }
 
 fn build_map(input: &str) -> Vec<Vec<char>> {
