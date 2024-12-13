@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use hashbrown::{HashMap, HashSet};
 
 use rayon::prelude::*;
@@ -17,10 +19,7 @@ pub fn part_two(input: &str) -> usize {
     visited
         .par_iter()
         .map(|&((x, y), _)| {
-            let mut new_map = map.clone();
-            new_map[y][x] = '#';
-
-            fast_traverse_map_and_detect_cycle(&new_map, position, direction) as usize
+            fast_traverse_map_and_detect_cycle(&map, position, direction, &(x, y)) as usize
         })
         .sum()
 }
@@ -67,16 +66,18 @@ pub fn fast_traverse_map_and_detect_cycle(
     map: &[Vec<char>],
     mut position: (usize, usize),
     mut direction: char,
+    obstacle_position: &(usize, usize),
 ) -> bool {
     let mut visited_set = HashSet::new();
     visited_set.insert((position, direction));
 
     while inside_bounds(map, &position, &direction) {
-        if is_blocked(map, &position, &direction) {
+        if is_blocked_with_override(map, &position, &direction, obstacle_position) {
             turn_right(&mut direction);
         }
 
-        let distance = distance_to_obstacle(map, &position, &direction);
+        let distance =
+            distance_to_obstacle_with_override(map, &position, &direction, obstacle_position);
         if distance == 0 {
             continue;
         }
@@ -92,10 +93,68 @@ pub fn fast_traverse_map_and_detect_cycle(
     false
 }
 
-#[derive(Hash, Eq, PartialEq, Clone)]
-pub struct DistanceKey {
-    position: (usize, usize),
-    direction: char,
+fn is_blocked_with_override(
+    map: &[Vec<char>],
+    position: &(usize, usize),
+    direction: &char,
+    obstacle_position: &(usize, usize),
+) -> bool {
+    let next_pos = match direction {
+        '<' => (position.0 - 1, position.1),
+        '>' => (position.0 + 1, position.1),
+        '^' => (position.0, position.1 - 1),
+        'V' => (position.0, position.1 + 1),
+        _ => panic!("Invalid direction"),
+    };
+
+    if &next_pos == obstacle_position {
+        true
+    } else {
+        match direction {
+            '<' => map[position.1][position.0 - 1] == '#',
+            '>' => map[position.1][position.0 + 1] == '#',
+            '^' => map[position.1 - 1][position.0] == '#',
+            'V' => map[position.1 + 1][position.0] == '#',
+            _ => panic!("Invalid direction"),
+        }
+    }
+}
+
+fn distance_to_obstacle_with_override(
+    map: &[Vec<char>],
+    position: &(usize, usize),
+    direction: &char,
+    obstacle_position: &(usize, usize),
+) -> usize {
+    match direction {
+        '<' => (0..position.0)
+            .rev()
+            .take_while(|&x| {
+                let pos = (x, position.1);
+                &pos != obstacle_position && map[position.1][x] != '#'
+            })
+            .count(),
+        '>' => (position.0 + 1..map[0].len())
+            .take_while(|&x| {
+                let pos = (x, position.1);
+                &pos != obstacle_position && map[position.1][x] != '#'
+            })
+            .count(),
+        '^' => (0..position.1)
+            .rev()
+            .take_while(|&y| {
+                let pos = (position.0, y);
+                &pos != obstacle_position && map[y][position.0] != '#'
+            })
+            .count(),
+        'V' => (position.1 + 1..map.len())
+            .take_while(|&y| {
+                let pos = (position.0, y);
+                &pos != obstacle_position && map[y][position.0] != '#'
+            })
+            .count(),
+        _ => panic!("Invalid direction"),
+    }
 }
 
 /// Returns the distance to the next obstacle or boundary in the given direction
