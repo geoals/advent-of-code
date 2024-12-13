@@ -1,3 +1,5 @@
+use hashbrown::{HashMap, HashSet};
+
 use rayon::prelude::*;
 
 pub fn part_one(input: &str) -> usize {
@@ -17,11 +19,8 @@ pub fn part_two(input: &str) -> usize {
         .map(|&((x, y), _)| {
             let mut new_map = map.clone();
             new_map[y][x] = '#';
-            if traverse_map(&new_map, position, direction).is_none() {
-                1
-            } else {
-                0
-            }
+
+            fast_traverse_map_and_detect_cycle(&new_map, position, direction) as usize
         })
         .sum()
 }
@@ -50,6 +49,7 @@ pub fn traverse_map(
         visited[position.1][position.0] = Some(direction);
     }
 
+    // counter instead
     // Transform full 2D grid to list of visited positions and direction tuple
     let mut positions = Vec::new();
     for (y, row) in visited.iter().enumerate() {
@@ -61,6 +61,62 @@ pub fn traverse_map(
     }
 
     Some(positions)
+}
+
+pub fn fast_traverse_map_and_detect_cycle(
+    map: &[Vec<char>],
+    mut position: (usize, usize),
+    mut direction: char,
+) -> bool {
+    let mut visited_set = HashSet::new();
+    visited_set.insert((position, direction));
+
+    while inside_bounds(map, &position, &direction) {
+        if is_blocked(map, &position, &direction) {
+            turn_right(&mut direction);
+        }
+
+        let distance = distance_to_obstacle(map, &position, &direction);
+        if distance == 0 {
+            continue;
+        }
+
+        move_forward_by(distance, &mut position, &direction);
+
+        if visited_set.contains(&(position, direction)) {
+            return true;
+        }
+        visited_set.insert((position, direction));
+    }
+
+    false
+}
+
+#[derive(Hash, Eq, PartialEq, Clone)]
+pub struct DistanceKey {
+    position: (usize, usize),
+    direction: char,
+}
+
+/// Returns the distance to the next obstacle or boundary in the given direction
+fn distance_to_obstacle(map: &[Vec<char>], position: &(usize, usize), direction: &char) -> usize {
+    match direction {
+        '<' => (0..position.0)
+            .rev()
+            .take_while(|&x| map[position.1][x] != '#')
+            .count(),
+        '>' => (position.0 + 1..map[0].len())
+            .take_while(|&x| map[position.1][x] != '#')
+            .count(),
+        '^' => (0..position.1)
+            .rev()
+            .take_while(|&y| map[y][position.0] != '#')
+            .count(),
+        'V' => (position.1 + 1..map.len())
+            .take_while(|&y| map[y][position.0] != '#')
+            .count(),
+        _ => panic!("Invalid direction"),
+    }
 }
 
 fn build_map(input: &str) -> Vec<Vec<char>> {
@@ -114,6 +170,16 @@ fn move_forward(position: &mut (usize, usize), direction: &char) {
         '>' => position.0 += 1,
         '^' => position.1 -= 1,
         'V' => position.1 += 1,
+        _ => panic!("Invalid direction"),
+    }
+}
+
+fn move_forward_by(distance: usize, position: &mut (usize, usize), direction: &char) {
+    match direction {
+        '<' => position.0 -= distance,
+        '>' => position.0 += distance,
+        '^' => position.1 -= distance,
+        'V' => position.1 += distance,
         _ => panic!("Invalid direction"),
     }
 }
